@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>공룡삼촌의 과일/야채 장바구니 시세</title>
+<title>공룡삼촌의 장바구니 시세</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: 경매장 시세판처럼 한 장의 가격표. 상단 요약(급등·급락) → 필터 줄 → 촘촘한 시세표 → 품목 상세 시트 */
+/* Layout: 경매장 시세판처럼 한 장의 가격표. 머리(로고·검색) → 급등·급락 요약 → 필터 줄 → 촘촘한 시세표 → 품목 상세 시트 */
 :root {
   --bg: #f4f6f1;          /* 배추 겉잎빛이 살짝 도는 종이 */
   --surface: #ffffff;
@@ -23,7 +24,6 @@
   --up-soft: #fbe7e5;
   --down: #2357b5;        /* 하락 파랑 */
   --down-soft: #e4ecfa;
-  --bar: #9fb8a5;
   --font-display: "Do Hyeon", "IBM Plex Sans KR", system-ui, sans-serif;
   --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
   --font-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -32,14 +32,14 @@
   :root:not([data-theme="light"]) {
     --bg: #121713; --surface: #1a211c; --ink: #e7ece6; --ink-2: #b4beb5; --muted: #869188;
     --line: #2b352e; --accent: #7cc490; --accent-soft: #213027;
-    --up: #ff7a70; --up-soft: #3a1f1d; --down: #7ea8ff; --down-soft: #1c2740; --bar: #4f6b57;
+    --up: #ff7a70; --up-soft: #3a1f1d; --down: #7ea8ff; --down-soft: #1c2740;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #121713; --surface: #1a211c; --ink: #e7ece6; --ink-2: #b4beb5; --muted: #869188;
   --line: #2b352e; --accent: #7cc490; --accent-soft: #213027;
-  --up: #ff7a70; --up-soft: #3a1f1d; --down: #7ea8ff; --down-soft: #1c2740; --bar: #4f6b57;
+  --up: #ff7a70; --up-soft: #3a1f1d; --down: #7ea8ff; --down-soft: #1c2740;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -52,18 +52,30 @@ body {
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 28px 56px;
 }
-.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 28px; }
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 24px; }
 .num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
 button { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* 머리 */
-header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; border-bottom: 2px solid var(--ink); padding-bottom: 14px; }
-.brand h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2rem, 5vw, 2.9rem); line-height: 1; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
-.brand p { margin: 8px 0 0; color: var(--ink-2); max-width: 60ch; }
+header { display: grid; gap: 16px; border-bottom: 2px solid var(--ink); padding-bottom: 18px; }
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; }
+.brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.brand img { width: 56px; height: 56px; flex: none; }
+.brand h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.9rem, 5vw, 2.7rem); line-height: 1.05; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.brand p { margin: 4px 0 0; color: var(--ink-2); font-size: 14px; }
 .stamp { display: grid; gap: 2px; text-align: right; font-size: 13px; color: var(--ink-2); }
 .stamp strong { font-family: var(--font-num); font-size: 15px; color: var(--ink); font-weight: 500; }
 .stamp a { color: var(--accent); }
+.search { position: relative; display: block; }
+.search input {
+  width: 100%; padding: 13px 16px 13px 44px; border: 2px solid var(--ink); border-radius: 8px;
+  background: var(--surface); color: var(--ink); font: inherit; font-size: 17px;
+}
+.search input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.search svg { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; stroke: var(--muted); }
+.search kbd { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: var(--font-num); font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; }
+.hits { font-size: 13px; color: var(--muted); }
 
 /* 요약 */
 .movers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -81,32 +93,33 @@ header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content:
 .seg { display: inline-flex; border: 1px solid var(--ink); border-radius: 6px; overflow: hidden; }
 .seg button { border: 0; background: var(--surface); padding: 7px 16px; cursor: pointer; font-weight: 500; }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.seg.small button { padding: 4px 12px; font-size: 13px; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chips button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; cursor: pointer; font-size: 14px; }
 .chips button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
-.search { margin-left: auto; flex: 1 1 200px; max-width: 280px; }
-.search input { width: 100%; padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); font: inherit; }
 
 /* 표 */
 .board { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: 10px 14px; text-align: right; white-space: nowrap; }
 th:first-child, td:first-child { text-align: left; }
-thead th { position: sticky; top: 0; background: var(--surface); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--muted); border-bottom: 1px solid var(--ink); }
+thead th { background: var(--surface); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--muted); border-bottom: 1px solid var(--ink); }
 thead th button { background: none; border: 0; padding: 0; cursor: pointer; font: inherit; color: inherit; letter-spacing: inherit; }
 thead th button[data-dir]::after { content: attr(data-dir); margin-left: 3px; color: var(--accent); }
 tbody tr { border-top: 1px solid var(--line); cursor: pointer; }
 tbody tr:hover { background: var(--accent-soft); }
-td.item { white-space: normal; min-width: 150px; }
+td.item { white-space: normal; min-width: 160px; }
 td.item .cat { display: block; font-size: 12px; color: var(--muted); }
+.rank { display: inline-block; margin-left: 6px; padding: 0 6px; border: 1px solid var(--line); border-radius: 4px; font-size: 12px; color: var(--ink-2); vertical-align: 1px; }
+mark { background: var(--accent-soft); color: var(--accent); border-radius: 2px; }
 td.price { font-size: 16px; font-weight: 500; }
 td.unit { color: var(--muted); font-size: 13px; }
-.chg { display: inline-block; min-width: 64px; padding: 1px 6px; border-radius: 4px; font-size: 13px; }
+.chg { display: inline-block; min-width: 64px; padding: 1px 6px; border-radius: 4px; font-size: 13px; text-align: right; }
 .chg.up { color: var(--up); background: var(--up-soft); }
 .chg.down { color: var(--down); background: var(--down-soft); }
 .chg.flat, .chg.na { color: var(--muted); }
 .fc { display: inline-flex; gap: 6px; align-items: baseline; }
-.fc .arrow.up { color: var(--up); } .fc .arrow.down { color: var(--down); } .fc .arrow.flat { color: var(--muted); }
+.arrow.up { color: var(--up); } .arrow.down { color: var(--down); } .arrow.flat { color: var(--muted); }
 .empty { padding: 40px; text-align: center; color: var(--muted); }
 .foot { font-size: 13px; color: var(--muted); display: grid; gap: 4px; max-width: 75ch; }
 .foot a { color: var(--accent); }
@@ -114,7 +127,7 @@ td.unit { color: var(--muted); font-size: 13px; }
 /* 상세 시트 */
 .sheet-bg { position: fixed; inset: 0; background: rgb(0 0 0 / 0.35); z-index: 20; }
 .sheet {
-  position: fixed; z-index: 21; top: 0; right: 0; bottom: 0; width: min(460px, 100%);
+  position: fixed; z-index: 21; top: 0; right: 0; bottom: 0; width: min(500px, 100%);
   background: var(--surface); border-left: 1px solid var(--line); overflow-y: auto;
   padding: calc(24px + env(safe-area-inset-top, 0px)) max(22px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) 22px;
   display: grid; align-content: start; gap: 20px;
@@ -124,22 +137,29 @@ td.unit { color: var(--muted); font-size: 13px; }
 .sheet .meta { color: var(--muted); font-size: 13px; margin-top: 4px; }
 .big { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .big .num { font-size: 2rem; font-weight: 500; }
-.kv { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.kv div { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
-.kv span { display: block; font-size: 12px; color: var(--muted); }
-.sheet h4 { margin: 0 0 6px; font-size: 13px; letter-spacing: 0.04em; color: var(--ink-2); }
+.big .when { color: var(--muted); font-size: 13px; }
+.kv { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.kv div { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; display: grid; gap: 2px; }
+.kv span { font-size: 12px; color: var(--muted); }
+.kv b { font-weight: 500; }
+.chart-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
+.chart-head h4 { margin: 0; font-size: 13px; letter-spacing: 0.04em; color: var(--ink-2); }
 .chart { position: relative; }
-.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; }
 .chart text { fill: var(--muted); font-family: var(--font-num); font-size: 11px; }
-.chart .lbl { fill: var(--ink); font-size: 11px; }
-.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; padding: 4px 8px; border-radius: 4px; white-space: nowrap; transform: translate(-50%, -110%); }
-.note { font-size: 13px; color: var(--ink-2); background: var(--bg); border-radius: 6px; padding: 10px 12px; }
+.chart .end { fill: var(--ink); font-weight: 500; }
+.legend { display: flex; gap: 16px; font-size: 12px; color: var(--ink-2); margin-top: 6px; }
+.legend i { display: inline-block; width: 18px; height: 0; border-top: 2px solid var(--accent); vertical-align: middle; margin-right: 6px; }
+.legend i.dash { border-top-style: dashed; }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; padding: 4px 8px; border-radius: 4px; white-space: nowrap; transform: translate(-50%, calc(-100% - 10px)); }
+.note { font-size: 13px; color: var(--ink-2); background: var(--bg); border-radius: 6px; padding: 10px 12px; margin: 0; }
 
 @media (max-width: 680px) {
   .movers { grid-template-columns: minmax(0, 1fr); }
   .col-month, .col-year, .col-unit { display: none; }
   th, td { padding: 9px 8px; }
-  .search { max-width: none; margin-left: 0; }
+  .stamp { text-align: left; }
+  .search kbd { display: none; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .sheet { animation: slide .18s ease-out; }
@@ -150,18 +170,28 @@ td.unit { color: var(--muted); font-size: 13px; }
 <body>
 <div class="wrap">
   <header>
-    <div class="brand">
-      <h1>공룡삼촌의 과일/야채 장바구니 시세</h1>
-      <p>채소·과일·축산·수산물 소매가와 도매가를 매일 한 번 갱신합니다. 빨강은 상승, 파랑은 하락입니다.</p>
+    <div class="top">
+      <div class="brand">
+        <img src="favicon.svg" alt="" width="56" height="56">
+        <div>
+          <h1>공룡삼촌의 장바구니 시세</h1>
+          <p>채소·과일·고기·생선의 소매가와 도매가를 매일 갱신합니다. 빨강은 상승, 파랑은 하락입니다.</p>
+        </div>
+      </div>
+      <div class="stamp">
+        <span>조사 기준일 <strong id="dataDate">-</strong></span>
+        <span>갱신 <span id="updatedAt" class="num">-</span></span>
+        <span>출처 <a href="https://www.kamis.or.kr" target="_blank" rel="noopener">KAMIS 농산물유통정보</a></span>
+      </div>
     </div>
-    <div class="stamp">
-      <span>조사 기준일 <strong id="dataDate">-</strong></span>
-      <span>갱신 <span id="updatedAt" class="num">-</span></span>
-      <span>출처 <a id="srcLink" href="https://www.kamis.or.kr" target="_blank" rel="noopener">KAMIS</a></span>
-    </div>
+    <label class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <input id="q" type="search" placeholder="품목 검색: 배추, 사과, 삼겹살, 고등어…" aria-label="품목 검색" autocomplete="off" autofocus>
+      <kbd>/</kbd>
+    </label>
   </header>
 
-  <div class="movers">
+  <div class="movers" id="movers">
     <section><h2><span class="tick" style="background:var(--up)"></span>전일 대비 많이 오른 품목</h2><ol id="risers"></ol></section>
     <section><h2><span class="tick" style="background:var(--down)"></span>전일 대비 많이 내린 품목</h2><ol id="fallers"></ol></section>
   </div>
@@ -172,7 +202,7 @@ td.unit { color: var(--muted); font-size: 13px; }
       <button type="button" id="cls-whole" data-cls="도매" aria-pressed="false">도매</button>
     </div>
     <div class="chips" id="chips" role="group" aria-label="품목 분류"></div>
-    <label class="search"><input id="q" type="search" placeholder="품목 검색 (예: 배추, 삼겹살)" aria-label="품목 검색"></label>
+    <span class="hits" id="hits"></span>
   </div>
 
   <div class="board">
@@ -180,7 +210,7 @@ td.unit { color: var(--muted); font-size: 13px; }
       <thead><tr>
         <th><button data-sort="name">품목</button></th>
         <th class="col-unit">단위</th>
-        <th><button data-sort="price">당일 가격</button></th>
+        <th><button data-sort="price">최근 가격</button></th>
         <th><button data-sort="change_day_pct">전일비</button></th>
         <th class="col-month"><button data-sort="change_month_pct">1개월비</button></th>
         <th class="col-year"><button data-sort="change_year_pct">1년비</button></th>
@@ -191,8 +221,8 @@ td.unit { color: var(--muted); font-size: 13px; }
   </div>
 
   <div class="foot">
-    <span>가격은 KAMIS가 전국 주요 시장에서 조사한 평균가(원)입니다. 소매는 소비자 구매가, 도매는 상회 판매가 기준입니다.</span>
-    <span>예측은 누적 이력과 1개월 추세로 계산한 단순 추정치로, 참고용입니다.</span>
+    <span>가격은 KAMIS가 전국 주요 시장에서 조사한 평균가(원)입니다. 소매는 소비자 구매가, 도매는 상회 판매가 기준이고 등급(상품·중품 등)별로 나눠 보여줍니다.</span>
+    <span>예측은 최근 14개 조사일의 추세로 계산한 단순 추정치로, 참고용입니다.</span>
   </div>
 </div>
 
@@ -204,40 +234,46 @@ const CATS = [
   ["all", "전체"], ["200", "채소"], ["400", "과일"], ["500", "축산"],
   ["600", "수산"], ["100", "식량"], ["300", "특용"],
 ];
-const state = { cls: "소매", cat: "all", q: "", sort: "change_day_pct", dir: -1, data: null, history: {} };
+const DOW = "일월화수목금토";
+const state = { cls: "소매", cat: "all", q: "", sort: "change_day_pct", dir: -1, range: 90, open: null, data: null, history: {} };
 const won = n => n == null ? "-" : n.toLocaleString("ko-KR");
 const dirOf = v => v == null ? "na" : v >= 0.5 ? "up" : v <= -0.5 ? "down" : "flat";
 const chg = v => `<span class="chg num ${dirOf(v)}">${v == null ? "-" : (v > 0 ? "▲ " : v < 0 ? "▼ " : "") + Math.abs(v).toFixed(1) + "%"}</span>`;
 const arrow = d => ({ up: "▲", down: "▼", flat: "–" })[d];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const toDate = s => new Date(s + "T00:00:00");
+const md = s => { const d = toDate(s); return `${d.getMonth() + 1}/${d.getDate()}`; };
+const fullDate = s => { const d = toDate(s); return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일(${DOW[d.getDay()]})`; };
+const shortDate = s => `${md(s)}(${DOW[toDate(s).getDay()]})`;
+const label = i => esc(i.name) + (i.rank ? `<span class="rank">${esc(i.rank)}</span>` : "");
 
 async function load() {
   try {
-    const [latest, history] = await Promise.all([
-      fetch("data/latest.json", { cache: "no-store" }).then(r => r.json()),
-      fetch("data/history.json", { cache: "no-store" }).then(r => r.json()).catch(() => ({})),
-    ]);
-    state.data = latest; state.history = history;
-    document.getElementById("dataDate").textContent = latest.data_date;
+    const latest = await fetch("data/latest.json", { cache: "no-store" }).then(r => r.json());
+    state.data = latest;
+    document.getElementById("dataDate").textContent = fullDate(latest.data_date);
     document.getElementById("updatedAt").textContent = latest.updated_at.replace("T", " ").slice(0, 16);
     render();
+    state.history = await fetch("data/history.json", { cache: "no-store" }).then(r => r.json()).catch(() => ({}));
+    if (state.open) openSheet(state.open);
   } catch (e) {
     document.getElementById("rows").innerHTML = `<tr><td colspan="7" class="empty">시세 파일(data/latest.json)을 읽지 못했습니다. 수집 스크립트를 먼저 실행해 주세요.</td></tr>`;
   }
 }
 
 function pool() { return state.data.items.filter(i => i.cls === state.cls); }
+function matches(i, q) { return !q || (i.name + " " + i.rank + " " + i.category).includes(q); }
 
 function render() {
-  const chips = document.getElementById("chips");
-  chips.innerHTML = CATS.map(([code, label]) => {
-    const n = code === "all" ? pool().length : pool().filter(i => i.category_code === code).length;
-    return n ? `<button type="button" id="cat-${code}" data-cat="${code}" aria-pressed="${state.cat === code}">${label} <span class="num">${n}</span></button>` : "";
-  }).join("");
-  if (!pool().some(i => state.cat === "all" || i.category_code === state.cat)) state.cat = "all";
-
   const q = state.q.trim();
-  let list = pool().filter(i => (state.cat === "all" || i.category_code === state.cat) && (!q || i.name.includes(q)));
+  const base = pool().filter(i => matches(i, q));
+  if (state.cat !== "all" && !base.some(i => i.category_code === state.cat)) state.cat = "all";
+  document.getElementById("chips").innerHTML = CATS.map(([code, name]) => {
+    const n = code === "all" ? base.length : base.filter(i => i.category_code === code).length;
+    return n ? `<button type="button" id="cat-${code}" data-cat="${code}" aria-pressed="${state.cat === code}">${name} <span class="num">${n}</span></button>` : "";
+  }).join("");
+
+  let list = base.filter(i => state.cat === "all" || i.category_code === state.cat);
   const key = state.sort;
   const val = i => key === "fc" ? i.forecast?.change_pct : i[key];
   list.sort((a, b) => {
@@ -249,121 +285,162 @@ function render() {
   document.querySelectorAll("thead button").forEach(b => {
     if (b.dataset.sort === key) b.dataset.dir = state.dir < 0 ? "↓" : "↑"; else delete b.dataset.dir;
   });
+  document.getElementById("hits").textContent = q ? `"${q}" 검색 결과 ${list.length}건` : "";
 
+  const hl = s => q ? esc(s).split(esc(q)).join(`<mark>${esc(q)}</mark>`) : esc(s);
   document.getElementById("rows").innerHTML = list.length ? list.map(i => `
     <tr data-id="${i.id}" tabindex="0">
-      <td class="item">${esc(i.name)}<span class="cat">${esc(i.category)}${i.latest_day !== state.data.data_date ? ` · ${i.latest_day.slice(5)} 조사` : ""}</span></td>
+      <td class="item">${hl(i.name)}${i.rank ? `<span class="rank">${esc(i.rank)}</span>` : ""}<span class="cat">${esc(i.category)} · ${shortDate(i.latest_day)} 조사</span></td>
       <td class="unit col-unit">${esc(i.unit)}</td>
       <td class="price num">${won(i.price)}</td>
       <td>${chg(i.change_day_pct)}</td>
       <td class="col-month">${chg(i.change_month_pct)}</td>
       <td class="col-year">${chg(i.change_year_pct)}</td>
       <td><span class="fc num"><span class="arrow ${i.forecast.direction}">${arrow(i.forecast.direction)}</span>${won(i.forecast.next)}</span></td>
-    </tr>`).join("") : `<tr><td colspan="7" class="empty">조건에 맞는 품목이 없습니다. 검색어나 분류를 바꿔 보세요.</td></tr>`;
+    </tr>`).join("") : `<tr><td colspan="7" class="empty">"${esc(q)}"에 맞는 ${esc(state.cls)} 품목이 없습니다. ${state.cls === "소매" ? "도매" : "소매"}로 바꾸거나 다른 이름으로 검색해 보세요.</td></tr>`;
 
-  const movers = pool().filter(i => i.change_day_pct != null);
-  const li = i => `<li><button type="button" data-id="${i.id}"><span class="nm">${esc(i.name)}</span><span class="pr num">${won(i.price)}원/${esc(i.unit)}</span>${chg(i.change_day_pct)}</button></li>`;
+  // 토요일엔 일부 품목만 조사되므로 기준일 7일 이내 조사 품목을 모두 비교한다
+  const since = new Date(toDate(state.data.data_date) - 7 * 864e5);
+  const movers = pool().filter(i => i.change_day_pct != null && toDate(i.latest_day) >= since);
+  const li = i => `<li><button type="button" data-id="${i.id}"><span class="nm">${label(i)}</span><span class="pr num">${won(i.price)}원/${esc(i.unit)}</span>${chg(i.change_day_pct)}</button></li>`;
   const up = movers.filter(i => i.change_day_pct > 0).sort((a, b) => b.change_day_pct - a.change_day_pct).slice(0, 5);
   const dn = movers.filter(i => i.change_day_pct < 0).sort((a, b) => a.change_day_pct - b.change_day_pct).slice(0, 5);
   document.getElementById("risers").innerHTML = up.map(li).join("") || `<li class="pr">오른 품목이 없습니다</li>`;
   document.getElementById("fallers").innerHTML = dn.map(li).join("") || `<li class="pr">내린 품목이 없습니다</li>`;
 }
 
-/* 비교 막대: 1년전 · 1개월전 · 전일 · 당일 · 예측 (0 기준선) */
-function barChart(i) {
-  const bars = [["1년 전", i.year_ago], ["1개월 전", i.month_ago], ["전일", i.prev_day], ["당일", i.price], ["예측", i.forecast.next]];
-  const W = 400, H = 190, top = 22, bottom = 26, gap = 18;
-  const max = Math.max(...bars.map(b => b[1] || 0)) * 1.08;
-  const bw = (W - gap * (bars.length - 1)) / bars.length;
-  const y = v => top + (H - top - bottom) * (1 - v / max);
-  const base = H - bottom;
-  const marks = bars.map(([label, v], k) => {
-    const x = k * (bw + gap);
-    const fill = label === "당일" ? "var(--accent)" : label === "예측" ? "none" : "var(--bar)";
-    const stroke = label === "예측" ? `stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"` : "";
-    const h = v ? base - y(v) : 0;
-    const r = Math.min(4, h);
-    const path = v ? `<path d="M${x},${base} V${y(v) + r} q0,-${r} ${r},-${r} H${x + bw - r} q${r},0 ${r},${r} V${base} Z" fill="${fill}" ${stroke}/>` : "";
-    return `${path}
-      <text class="lbl" x="${x + bw / 2}" y="${v ? y(v) - 6 : base - 6}" text-anchor="middle">${v ? won(v) : "자료 없음"}</text>
-      <text x="${x + bw / 2}" y="${H - 8}" text-anchor="middle">${label}</text>`;
+/* 일별 추이: 실제 날짜 축 위의 선 + 다음 조사일 예측 점선 */
+function lineChart(i) {
+  const all = state.history[i.id];
+  if (!all) return `<p class="note">일별 이력을 불러오는 중입니다…</p>`;
+  const from = new Date(toDate(i.latest_day) - state.range * 864e5);
+  const s = all.filter(([d]) => toDate(d) >= from).map(([d, v]) => ({ d, v, t: +toDate(d) }));
+  if (s.length < 2) return `<p class="note">이 기간에는 조사된 가격이 ${s.length}건뿐이라 선을 그릴 수 없습니다.</p>`;
+  const fc = { d: i.forecast.date, v: i.forecast.next, t: +toDate(i.forecast.date), fc: true };
+  const pts = [...s, fc];
+  const W = 460, H = 220, L = 4, R = 58, T = 16, B = 26;
+  let lo = Math.min(...pts.map(p => p.v)), hi = Math.max(...pts.map(p => p.v));
+  if (hi === lo) { lo *= 0.95; hi *= 1.05; }
+  const pad = (hi - lo) * 0.12; lo -= pad; hi += pad;
+  const t0 = pts[0].t, t1 = fc.t;
+  const x = t => L + (W - L - R) * (t - t0) / (t1 - t0);
+  const y = v => T + (H - T - B) * (1 - (v - lo) / (hi - lo));
+  const line = s.map((p, k) => `${k ? "L" : "M"}${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`).join(" ");
+  const last = s[s.length - 1];
+  const area = `${line} L${x(last.t)},${H - B} L${x(s[0].t)},${H - B} Z`;
+  // 가격 눈금 4개 (둥근 값)
+  const step = niceStep((hi - lo) / 4);
+  const yt = []; for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) yt.push(v);
+  const yTicks = yt.map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/>
+    <text x="${W - R + 6}" y="${y(v) + 4}">${won(v)}</text>`).join("");
+  // 날짜 눈금: 기간에 맞춰 5개 안팎
+  const n = 5, xt = [];
+  for (let k = 0; k < n; k++) xt.push(t0 + (t1 - t0) * k / (n - 1));
+  const xTicks = xt.map((t, k) => {
+    const d = new Date(t); const s2 = `${d.getMonth() + 1}/${d.getDate()}`;
+    const anchor = k === 0 ? "start" : k === n - 1 ? "end" : "middle";
+    return `<line x1="${x(t)}" x2="${x(t)}" y1="${H - B}" y2="${H - B + 4}" stroke="var(--muted)"/>
+      <text x="${x(t)}" y="${H - 8}" text-anchor="${anchor}">${s2}</text>`;
   }).join("");
-  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="기간별 가격 비교">
-    <line x1="0" x2="${W}" y1="${base}" y2="${base}" stroke="var(--line)"/>${marks}</svg>`;
+  const dots = pts.length <= 40 ? s.map(p => `<circle cx="${x(p.t)}" cy="${y(p.v)}" r="2.5" fill="var(--accent)"/>`).join("") : "";
+  return `<div class="chart" id="lineWrap">
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(i.name)} 일별 가격 추이">
+      ${yTicks}
+      <line x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}" stroke="var(--muted)"/>
+      ${xTicks}
+      <path d="${area}" fill="var(--accent)" opacity="0.12"/>
+      <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M${x(last.t)},${y(last.v)} L${x(fc.t)},${y(fc.v)}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 4"/>
+      ${dots}
+      <circle cx="${x(last.t)}" cy="${y(last.v)}" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>
+      <circle cx="${x(fc.t)}" cy="${y(fc.v)}" r="4.5" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>
+      <line id="cross" x1="0" x2="0" y1="${T}" y2="${H - B}" stroke="var(--muted)" stroke-dasharray="2 2" visibility="hidden"/>
+      <circle id="crossDot" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" visibility="hidden"/>
+      <rect id="hit" x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" fill="transparent"/>
+    </svg>
+    <div class="tip" id="tip" hidden></div>
+  </div>
+  <div class="legend"><span><i></i>조사 가격</span><span><i class="dash"></i>예측 (${shortDate(fc.d)})</span></div>`;
+}
+function niceStep(raw) {
+  const p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+  return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * p;
 }
 
-/* 누적 이력 선 그래프 + 예측 점선 */
-function lineChart(i) {
-  const s = (state.history[i.id] || []).map(([d, v]) => ({ d, v }));
-  if (s.length < 2) return `<p class="note">일별 이력은 매일 수집하면서 쌓입니다. 현재 ${s.length}일치가 있어 그래프는 2일째부터 표시됩니다.</p>`;
-  const W = 400, H = 170, L = 6, R = 50, T = 14, B = 22;
-  const pts = [...s, { d: "예측", v: i.forecast.next, fc: true }];
-  const vs = pts.map(p => p.v); let lo = Math.min(...vs), hi = Math.max(...vs);
-  const pad = (hi - lo || hi * 0.05) * 0.15; lo -= pad; hi += pad;
-  const x = k => L + (W - L - R) * k / (pts.length - 1);
-  const y = v => T + (H - T - B) * (1 - (v - lo) / (hi - lo));
-  const real = s.map((p, k) => `${k ? "L" : "M"}${x(k)},${y(p.v)}`).join(" ");
-  const n = s.length - 1;
-  const area = `${real} L${x(n)},${H - B} L${x(0)},${H - B} Z`;
-  const ticks = [lo + pad, (lo + hi) / 2, hi - pad].map(v => `
-    <line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-dasharray="2 3"/>
-    <text x="${W - R + 6}" y="${y(v) + 4}">${won(Math.round(v))}</text>`).join("");
-  const dots = pts.map((p, k) => `<circle cx="${x(k)}" cy="${y(p.v)}" r="${k === n ? 4.5 : 3}" fill="${p.fc ? "var(--surface)" : "var(--accent)"}" stroke="${p.fc ? "var(--accent)" : "var(--surface)"}" stroke-width="2"/>
-    <rect x="${x(k) - 12}" y="${T}" width="24" height="${H - T - B}" fill="transparent" data-k="${k}"/>`).join("");
-  return `<div class="chart" id="lineWrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="일별 가격 추이">
-    ${ticks}
-    <path d="${area}" fill="var(--accent)" opacity="0.12"/>
-    <path d="${real}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>
-    <path d="M${x(n)},${y(s[n].v)} L${x(n + 1)},${y(i.forecast.next)}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 4"/>
-    <text x="${L}" y="${H - 6}">${s[0].d.slice(5)}</text>
-    <text x="${x(n)}" y="${H - 6}" text-anchor="middle">${s[n].d.slice(5)}</text>
-    ${dots}</svg><div class="tip" id="tip" hidden></div></div>`;
+function bindChart(i) {
+  const wrap = document.getElementById("lineWrap"); if (!wrap) return;
+  const svg = wrap.querySelector("svg"), tip = document.getElementById("tip");
+  const cross = document.getElementById("cross"), dot = document.getElementById("crossDot");
+  const from = new Date(toDate(i.latest_day) - state.range * 864e5);
+  const pts = state.history[i.id].filter(([d]) => toDate(d) >= from).map(([d, v]) => ({ d, v }));
+  pts.push({ d: i.forecast.date, v: i.forecast.next, fc: true });
+  const move = e => {
+    const box = svg.getBoundingClientRect(), scale = svg.viewBox.baseVal.width / box.width;
+    const mx = (e.clientX - box.left) * scale;
+    // 화면 좌표에서 가장 가까운 점 찾기 (조사점은 SVG 좌표를 다시 계산)
+    const t0 = +toDate(pts[0].d), t1 = +toDate(pts[pts.length - 1].d), W = 460, L = 4, R = 58;
+    const xOf = p => L + (W - L - R) * (+toDate(p.d) - t0) / (t1 - t0);
+    let best = pts[0]; for (const p of pts) if (Math.abs(xOf(p) - mx) < Math.abs(xOf(best) - mx)) best = p;
+    const H = 220, T = 16, B = 26;
+    const vs = pts.map(p => p.v); let lo = Math.min(...vs), hi = Math.max(...vs);
+    if (hi === lo) { lo *= 0.95; hi *= 1.05; } const pad = (hi - lo) * 0.12; lo -= pad; hi += pad;
+    const cx = xOf(best), cy = T + (H - T - B) * (1 - (best.v - lo) / (hi - lo));
+    cross.setAttribute("x1", cx); cross.setAttribute("x2", cx); cross.setAttribute("visibility", "visible");
+    dot.setAttribute("cx", cx); dot.setAttribute("cy", cy); dot.setAttribute("visibility", "visible");
+    tip.textContent = `${fullDate(best.d)} · ${won(best.v)}원${best.fc ? " (예측)" : ""}`;
+    tip.hidden = false; tip.style.left = Math.min(Math.max(cx / scale, 90), box.width - 90) + "px"; tip.style.top = (cy / scale) + "px";
+  };
+  const hide = () => { tip.hidden = true; cross.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); };
+  svg.addEventListener("pointermove", move);
+  svg.addEventListener("pointerdown", move);
+  svg.addEventListener("pointerleave", hide);
 }
 
 function openSheet(id) {
   const i = state.data.items.find(x => x.id === id); if (!i) return;
+  state.open = id;
   const sheet = document.getElementById("sheet");
+  const ranges = [[30, "1개월"], [90, "3개월"]];
   sheet.innerHTML = `
     <button type="button" class="close" id="closeSheet">닫기</button>
-    <div><h3>${esc(i.name)}</h3><div class="meta">${esc(i.cls)} · ${esc(i.category)} · ${esc(i.unit)} 기준 · ${i.latest_day} 조사</div></div>
-    <div class="big"><span class="num">${won(i.price)}원</span>${chg(i.change_day_pct)}</div>
-    <div class="kv">
-      <div><span>1개월 전</span><b class="num">${won(i.month_ago)}</b> ${chg(i.change_month_pct)}</div>
-      <div><span>1년 전</span><b class="num">${won(i.year_ago)}</b> ${chg(i.change_year_pct)}</div>
-      <div><span>다음 조사일 예측</span><b class="num">${won(i.forecast.next)}</b> ${chg(i.forecast.change_pct)}</div>
+    <div><h3>${esc(i.name)}</h3><div class="meta">${esc(i.cls)} · ${esc(i.category)} · ${esc(i.unit)} 기준${i.rank ? " · " + esc(i.rank) : ""}</div></div>
+    <div class="big"><span class="num">${won(i.price)}원</span>${chg(i.change_day_pct)}<span class="when">${fullDate(i.latest_day)} 조사</span></div>
+    <div>
+      <div class="chart-head"><h4>일별 가격 추이</h4>
+        <div class="seg small" role="group" aria-label="기간">${ranges.map(([d, n]) => `<button type="button" id="range-${d}" data-range="${d}" aria-pressed="${state.range === d}">${n}</button>`).join("")}</div>
+      </div>
+      ${lineChart(i)}
     </div>
-    <div><h4>기간별 비교</h4><div class="chart">${barChart(i)}</div></div>
-    <div><h4>일별 추이</h4>${lineChart(i)}</div>
-    <p class="note">예측 방식: ${esc(i.forecast.method)}. 변동 폭은 당일가 기준 ±${i.forecast.method.includes("14일") ? 15 : 10}%로 제한합니다.</p>`;
+    <div class="kv">
+      <div><span>전일 ${i.prev_day_date ? shortDate(i.prev_day_date) : ""}</span><b class="num">${won(i.prev_day)}원</b>${chg(i.change_day_pct)}</div>
+      <div><span>다음 조사일 예측 ${shortDate(i.forecast.date)}</span><b class="num">${won(i.forecast.next)}원</b>${chg(i.forecast.change_pct)}</div>
+      <div><span>1개월 전</span><b class="num">${won(i.month_ago)}원</b>${chg(i.change_month_pct)}</div>
+      <div><span>1년 전</span><b class="num">${won(i.year_ago)}원</b>${chg(i.change_year_pct)}</div>
+      <div><span>평년 (최근 5년 평균)</span><b class="num">${won(i.normal)}원</b></div>
+    </div>
+    <p class="note">예측 방식: ${esc(i.forecast.method)}. 변동 폭은 최근 가격 기준 ±${i.forecast.method.includes("14개") ? 15 : 10}%로 제한합니다.</p>`;
+  const wasOpen = !sheet.hidden;
   sheet.hidden = false; document.getElementById("sheetBg").hidden = false;
-  document.getElementById("closeSheet").focus();
-  const wrap = document.getElementById("lineWrap");
-  if (wrap) {
-    const s = state.history[i.id]; const tip = document.getElementById("tip");
-    wrap.addEventListener("pointermove", e => {
-      const k = e.target.dataset?.k; if (k == null) { tip.hidden = true; return; }
-      const p = +k < s.length ? s[+k] : ["예측", i.forecast.next];
-      const box = wrap.getBoundingClientRect(), r = e.target.getBoundingClientRect();
-      tip.textContent = `${p[0]} · ${won(p[1])}원`; tip.hidden = false;
-      tip.style.left = (r.left + r.width / 2 - box.left) + "px"; tip.style.top = (e.clientY - box.top) + "px";
-    });
-    wrap.addEventListener("pointerleave", () => tip.hidden = true);
-  }
+  if (!wasOpen) document.getElementById("closeSheet").focus();
+  bindChart(i);
 }
-function closeSheet() { document.getElementById("sheet").hidden = true; document.getElementById("sheetBg").hidden = true; }
+function closeSheet() { state.open = null; document.getElementById("sheet").hidden = true; document.getElementById("sheetBg").hidden = true; }
 
 document.addEventListener("click", e => {
   const t = e.target.closest("button, tr[data-id]");
   if (!t) return;
   if (t.id === "closeSheet") return closeSheet();
-  if (t.dataset.cls) { state.cls = t.dataset.cls; document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", b === t)); return render(); }
+  if (t.dataset.range) { state.range = +t.dataset.range; return openSheet(state.open); }
+  if (t.dataset.cls) { state.cls = t.dataset.cls; document.querySelectorAll(".filters .seg button").forEach(b => b.setAttribute("aria-pressed", b === t)); return render(); }
   if (t.dataset.cat) { state.cat = t.dataset.cat; return render(); }
   if (t.dataset.sort) { state.dir = state.sort === t.dataset.sort ? -state.dir : (t.dataset.sort === "name" ? 1 : -1); state.sort = t.dataset.sort; return render(); }
   if (t.dataset.id) openSheet(t.dataset.id);
 });
 document.getElementById("sheetBg").addEventListener("click", closeSheet);
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") closeSheet();
+  const q = document.getElementById("q");
+  if (e.key === "Escape") { if (state.open) closeSheet(); else if (document.activeElement === q) { q.value = ""; state.q = ""; render(); } }
+  if (e.key === "/" && document.activeElement !== q) { e.preventDefault(); q.focus(); q.select(); }
   if (e.key === "Enter" && e.target.matches("tr[data-id]")) openSheet(e.target.dataset.id);
 });
 document.getElementById("q").addEventListener("input", e => { state.q = e.target.value; render(); });

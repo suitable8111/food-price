@@ -1,0 +1,18 @@
+<!-- 샘플 아이콘: 장바구니를 든 공룡. 이 파일만 교체하면 파비콘과 상단 로고가 함께 바뀝니다. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#2c6a3f"/>
+  <!-- 등 가시 -->
+  <path d="M19 27 l3 -7 l4 6 Z M25 22 l4 -7 l3 7 Z M32 19 l4 -6 l2 7 Z" fill="#f2c14e"/>
+  <!-- 몸통과 머리 -->
+  <path d="M12 54 C12 38 18 26 30 23 C36 21.5 38 15 46 15 C53 15 57 19.5 57 25 C57 30 53 32.5 48 32.5 C46 32.5 45 34 45 37 L45 54 Z" fill="#a8dc8e"/>
+  <circle cx="49.5" cy="22.5" r="2.4" fill="#18201a"/>
+  <circle cx="50.3" cy="21.7" r="0.8" fill="#ffffff"/>
+  <path d="M50 28.5 q3 1.2 5.5 -0.6" stroke="#18201a" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  <!-- 장바구니 속 사과와 당근 -->
+  <circle cx="16" cy="41" r="5" fill="#d9443b"/>
+  <path d="M16 36 q2 -3 4 -2" stroke="#2c6a3f" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  <path d="M24 44 L30 33 L32 34.5 Z" fill="#f08a2c"/>
+  <path d="M30 33 l1 -3 M30.8 33.6 l2.6 -1.8" stroke="#5aa24a" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M7 43 H37 L33.5 57 H10.5 Z" fill="#c98a3d"/>
+  <path d="M9 48 H35 M10 52.5 H34" stroke="#9c6526" stroke-width="1.4"/>
+</svg>
