@@ -1,0 +1,9 @@
+[Unit]
+Description=KAMIS 농축수산물 시세 수집 및 GitHub 푸시
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=@PROJECT@
+ExecStart=/usr/bin/env bash @PROJECT@/scripts/update_and_push.sh

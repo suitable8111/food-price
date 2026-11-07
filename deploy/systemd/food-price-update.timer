@@ -1,0 +1,11 @@
+[Unit]
+Description=매일 오후 시세 갱신 (KAMIS 당일 자료는 보통 오후에 확정)
+
+[Timer]
+OnCalendar=*-*-* 16:10:00 Asia/Seoul
+OnCalendar=*-*-* 09:10:00 Asia/Seoul
+Persistent=true
+RandomizedDelaySec=120
+
+[Install]
+WantedBy=timers.target

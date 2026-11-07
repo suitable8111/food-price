@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Validate published data
+        run: |
+          python - <<'PY'
+          import json
+          d = json.load(open("public/data/latest.json", encoding="utf-8"))
+          assert d["count"] == len(d["items"]) > 50, "품목 수 이상"
+          assert all(i["price"] > 0 for i in d["items"]), "가격 0 이하"
+          print("OK", d["data_date"], d["count"])
+          PY
