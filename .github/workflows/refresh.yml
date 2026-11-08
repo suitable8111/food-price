@@ -1,0 +1,40 @@
+name: Refresh prices
+
+# 사이트의 "최신화" 버튼(api/refresh.js)이 workflow_dispatch 로 실행한다.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-prices
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch KAMIS prices
+        env:
+          KAMIS_CERT_KEY: ${{ secrets.KAMIS_CERT_KEY }}
+          KAMIS_CERT_ID: ${{ secrets.KAMIS_CERT_ID }}
+        run: python scripts/fetch_prices.py
+      - name: Commit and push
+        run: |
+          git config user.name "food-price-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data
+          git diff --cached --quiet && { echo "변경 없음"; exit 0; }
+          git commit -m "data: 시세 최신화 (사이트 요청) $(TZ=Asia/Seoul date '+%F %H:%M')"
+          # 내 PC 타이머와 동시에 푸시했을 때를 대비해 재시도 (이번 실행 데이터 우선)
+          for n in 1 2 3; do
+            git push && exit 0
+            git pull --rebase -X theirs origin main
+          done
+          exit 1

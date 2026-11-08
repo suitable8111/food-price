@@ -67,6 +67,19 @@ header { display: grid; gap: 16px; border-bottom: 2px solid var(--ink); padding-
 .stamp { display: grid; gap: 2px; text-align: right; font-size: 13px; color: var(--ink-2); }
 .stamp strong { font-family: var(--font-num); font-size: 15px; color: var(--ink); font-weight: 500; }
 .stamp a { color: var(--accent); }
+.refresh { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
+.refresh button {
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  border: 1px solid var(--accent); background: var(--surface); color: var(--accent);
+  border-radius: 6px; padding: 5px 12px; font-size: 13px; font-weight: 600;
+}
+.refresh button:hover:not(:disabled) { background: var(--accent-soft); }
+.refresh button:disabled { cursor: progress; opacity: 0.7; }
+.refresh svg { width: 14px; height: 14px; stroke: currentColor; }
+.refresh button[aria-busy="true"] svg { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.refresh-msg { font-size: 12px; color: var(--ink-2); }
+.refresh-msg.err { color: var(--up); }
 .search { position: relative; display: block; }
 .search input {
   width: 100%; padding: 13px 16px 13px 44px; border: 2px solid var(--ink); border-radius: 8px;
@@ -159,6 +172,7 @@ td.unit { color: var(--muted); font-size: 13px; }
   .col-month, .col-year, .col-unit { display: none; }
   th, td { padding: 9px 8px; }
   .stamp { text-align: left; }
+  .refresh { justify-content: flex-start; }
   .search kbd { display: none; }
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -182,6 +196,13 @@ td.unit { color: var(--muted); font-size: 13px; }
         <span>조사 기준일 <strong id="dataDate">-</strong></span>
         <span>갱신 <span id="updatedAt" class="num">-</span></span>
         <span>출처 <a href="https://www.kamis.or.kr" target="_blank" rel="noopener">KAMIS 농산물유통정보</a></span>
+        <div class="refresh">
+          <span class="refresh-msg" id="refreshMsg" aria-live="polite"></span>
+          <button type="button" id="refreshBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+            최신화
+          </button>
+        </div>
       </div>
     </div>
     <label class="search">
@@ -247,9 +268,11 @@ const fullDate = s => { const d = toDate(s); return `${d.getFullYear()}년 ${d.g
 const shortDate = s => `${md(s)}(${DOW[toDate(s).getDay()]})`;
 const label = i => esc(i.name) + (i.rank ? `<span class="rank">${esc(i.rank)}</span>` : "");
 
-async function load() {
+const getLatest = () => fetch("data/latest.json", { cache: "no-store" }).then(r => r.json());
+
+async function load(latest) {
   try {
-    const latest = await fetch("data/latest.json", { cache: "no-store" }).then(r => r.json());
+    latest = latest || await getLatest();
     state.data = latest;
     document.getElementById("dataDate").textContent = fullDate(latest.data_date);
     document.getElementById("updatedAt").textContent = latest.updated_at.replace("T", " ").slice(0, 16);
@@ -260,6 +283,42 @@ async function load() {
     document.getElementById("rows").innerHTML = `<tr><td colspan="7" class="empty">시세 파일(data/latest.json)을 읽지 못했습니다. 수집 스크립트를 먼저 실행해 주세요.</td></tr>`;
   }
 }
+
+/* 최신화: 서버 함수가 GitHub Actions 로 수집 → 커밋 → Vercel 재배포. 새 latest.json 이 보이면 다시 그린다. */
+async function refreshPrices() {
+  const btn = document.getElementById("refreshBtn"), msg = document.getElementById("refreshMsg");
+  const say = (text, err) => { msg.textContent = text; msg.classList.toggle("err", !!err); };
+  const busy = on => { btn.disabled = on; btn.setAttribute("aria-busy", on); };
+  const before = state.data?.updated_at;
+  busy(true); say("최신화를 요청하는 중…");
+  try {
+    const res = await fetch("api/refresh", { method: "POST" });
+    const body = await res.json().catch(() => ({}));
+    if (res.status === 503) return say("서버 설정(GITHUB_TOKEN)이 아직 없어 최신화할 수 없습니다.", true);
+    if (res.status === 429) return say(`방금 최신화했습니다. ${Math.ceil(body.retry_after / 60)}분 뒤에 다시 눌러 주세요.`);
+    if (!res.ok) return say("최신화 요청에 실패했습니다. 잠시 뒤 다시 시도해 주세요.", true);
+
+    say("KAMIS에서 시세를 받는 중… (보통 1~2분)");
+    const deadline = Date.now() + 6 * 60 * 1000;
+    while (Date.now() < deadline) {
+      await new Promise(r => setTimeout(r, 8000));
+      const latest = await getLatest().catch(() => null);
+      if (latest && latest.updated_at !== before) {
+        await load(latest);
+        return say(`최신화 완료 · ${shortDate(latest.data_date)} 기준 ${latest.count}개 품목`);
+      }
+      const { run } = await fetch("api/refresh", { cache: "no-store" }).then(r => r.json()).catch(() => ({}));
+      if (run?.status === "completed" && run.conclusion !== "success") return say("수집 작업이 실패했습니다. 잠시 뒤 다시 시도해 주세요.", true);
+      if (run?.status === "completed") say("수집 완료. 사이트에 반영하는 중…");
+    }
+    say("반영이 늦어지고 있습니다. 잠시 뒤 새로고침해 주세요.", true);
+  } catch (e) {
+    say("서버에 연결하지 못했습니다. 배포된 사이트에서 다시 시도해 주세요.", true);
+  } finally {
+    busy(false);
+  }
+}
+document.getElementById("refreshBtn").addEventListener("click", refreshPrices);
 
 function pool() { return state.data.items.filter(i => i.cls === state.cls); }
 function matches(i, q) { return !q || (i.name + " " + i.rank + " " + i.category).includes(q); }

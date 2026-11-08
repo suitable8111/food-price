@@ -15,8 +15,16 @@ if git diff --cached --quiet; then
 fi
 git commit --quiet -m "data: 시세 갱신 $(TZ=Asia/Seoul date +%F)"
 if git remote get-url origin >/dev/null 2>&1; then
-  git push --quiet origin HEAD
-  echo "푸시 완료 → Vercel 자동 배포"
+  # 사이트 "최신화" 버튼(GitHub Actions)과 동시에 푸시했을 때를 대비해 재시도 (이번 실행 데이터 우선)
+  for n in 1 2 3; do
+    if git push --quiet origin HEAD; then
+      echo "푸시 완료 → Vercel 자동 배포"
+      exit 0
+    fi
+    git pull --rebase --quiet -X theirs origin main
+  done
+  echo "푸시 실패" >&2
+  exit 1
 else
   echo "origin 원격이 없어 푸시는 건너뜀"
 fi

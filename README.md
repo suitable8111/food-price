@@ -35,3 +35,13 @@ python3 -m unittest discover -s tests    # 테스트
 
 ## 아이콘 바꾸기
 `public/favicon.svg` 한 파일만 교체하면 브라우저 탭 아이콘과 상단 로고가 함께 바뀝니다.
+
+## 사이트의 "최신화" 버튼
+버튼 → `api/refresh.js`(Vercel 서버 함수) → GitHub Actions `refresh.yml` 실행 → 수집·커밋·푸시 → Vercel 재배포 →
+페이지가 새 `latest.json`을 감지해 다시 그림 (보통 1~2분). 남용을 막기 위해 10분 쿨다운이 있습니다.
+
+설정 (최초 1회)
+1. GitHub → Settings → Developer settings → Fine-grained tokens → Generate
+   - Repository access: `food-price` 하나만, Permissions → Actions: **Read and write**
+2. Vercel 프로젝트 → Settings → Environment Variables → `GITHUB_TOKEN` = 위 토큰 → Redeploy
+3. (선택) 개인 KAMIS 키는 GitHub 레포 Settings → Secrets → Actions 에 `KAMIS_CERT_KEY`, `KAMIS_CERT_ID`
