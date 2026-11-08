@@ -248,13 +248,25 @@ def build(day: date, by_combo: dict, data_dir: Path, extra_points: dict | None =
 
 
 def latest_available(cert, start: date) -> tuple[date, dict]:
-    """오늘 자료가 아직 없으면 하루씩 거슬러 올라가 가장 최근 조사일을 찾는다."""
+    """부류마다 가장 최근 조사일의 자료를 모은다.
+
+    주말에는 축산물처럼 일부 부류만 조사되므로, 아직 자료가 없는 부류는
+    하루씩 거슬러 올라가며 채운다.
+    """
+    wanted = {(c, k) for c in CLASSES for k in CATEGORIES if (c, k) not in SKIP}
+    merged: dict = {}
+    newest = None
     for back in range(7):
         day = start - timedelta(days=back)
-        by_combo = fetch_day(day, cert)
-        if by_combo:
-            return day, by_combo
-    raise RuntimeError("최근 7일간 조회된 자료가 없습니다")
+        for combo, rows in fetch_day(day, cert).items():
+            if combo not in merged:
+                merged[combo] = rows
+                newest = newest or day
+        if merged.keys() >= wanted:
+            break
+    if not merged:
+        raise RuntimeError("최근 7일간 조회된 자료가 없습니다")
+    return newest, merged
 
 
 def backfill(days: int, cert, end: date) -> dict:

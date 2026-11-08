@@ -68,5 +68,20 @@ class BuildTest(unittest.TestCase):
                 self.assertEqual(days, sorted(set(days)))
 
 
+class LatestAvailableTest(unittest.TestCase):
+    def test_weekend_partial_day_is_filled_from_earlier_days(self):
+        rows = load_fixture()
+        sunday, friday = date(2026, 11, 8), date(2026, 11, 6)
+        by_day = {sunday: {("01", "500"): rows[("01", "500")]}, friday: rows}
+        original = fp.fetch_day
+        fp.fetch_day = lambda day, cert: by_day.get(day, {})
+        try:
+            day, merged = fp.latest_available(("k", "i"), sunday)
+        finally:
+            fp.fetch_day = original
+        self.assertEqual(day, sunday)
+        self.assertEqual(set(merged), set(rows))
+
+
 if __name__ == "__main__":
     unittest.main()
